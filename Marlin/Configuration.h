@@ -1,6 +1,8 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#define ONE_UP
+
 #include "boards.h"
 #include "macros.h"
 
@@ -62,7 +64,11 @@ Here are some standard links for getting your machine calibrated:
 
 // This determines the communication speed of the printer
 // :[2400,9600,19200,38400,57600,115200,250000]
+#ifdef ONE_UP
+#define BAUDRATE 115200
+#else
 #define BAUDRATE 250000
+#endif
 
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
@@ -145,11 +151,19 @@ Here are some standard links for getting your machine calibrated:
 //     #define DUMMY_THERMISTOR_998_VALUE 25
 //     #define DUMMY_THERMISTOR_999_VALUE 100
 // :{ '0': "Not used", '4': "10k !! do not use for a hotend. Bad resolution at high temp. !!", '1': "100k / 4.7k - EPCOS", '51': "100k / 1k - EPCOS", '6': "100k / 4.7k EPCOS - Not as accurate as Table 1", '5': "100K / 4.7k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '7': "100k / 4.7k Honeywell 135-104LAG-J01", '71': "100k / 4.7k Honeywell 135-104LAF-J01", '8': "100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT", '9': "100k / 4.7k GE Sensing AL03006-58.2K-97-G1", '10': "100k / 4.7k RS 198-961", '11': "100k / 4.7k beta 3950 1%", '12': "100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT (calibrated for Makibox hot bed)", '13': "100k Hisens 3950  1% up to 300°C for hotend 'Simple ONE ' & hotend 'All In ONE'", '60': "100k Maker's Tool Works Kapton Bed Thermistor beta=3950", '55': "100k / 1k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '2': "200k / 4.7k - ATC Semitec 204GT-2", '52': "200k / 1k - ATC Semitec 204GT-2", '-2': "Thermocouple + MAX6675 (only for sensor 0)", '-1': "Thermocouple + AD595", '3': "Mendel-parts / 4.7k", '1047': "Pt1000 / 4.7k", '1010': "Pt1000 / 1k (non standard)", '20': "PT100 (Ultimainboard V2.x)", '147': "Pt100 / 4.7k", '110': "Pt100 / 1k (non-standard)", '998': "Dummy 1", '999': "Dummy 2" }
+#ifdef ONE_UP
+#define TEMP_SENSOR_0 -1
+#define TEMP_SENSOR_1 0
+#define TEMP_SENSOR_2 0
+#define TEMP_SENSOR_3 0
+#define TEMP_SENSOR_BED 1
+#else
 #define TEMP_SENSOR_0 1
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
 #define TEMP_SENSOR_BED 0
+#endif
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
 //#define TEMP_SENSOR_1_AS_REDUNDANT
@@ -207,6 +221,13 @@ Here are some standard links for getting your machine calibrated:
   #define PID_INTEGRAL_DRIVE_MAX PID_MAX  //limit for the integral term
   #define K1 0.95 //smoothing factor within the PID
 
+#ifdef ONE_UP
+  // Quintessential One-UP with Heated Bed
+  #define  DEFAULT_Kp 64.33
+  #define  DEFAULT_Ki 4.62
+  #define  DEFAULT_Kd 223.99
+
+#else
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
   // Ultimaker
   #define  DEFAULT_Kp 22.2
@@ -222,6 +243,8 @@ Here are some standard links for getting your machine calibrated:
   //#define  DEFAULT_Kp 63.0
   //#define  DEFAULT_Ki 2.25
   //#define  DEFAULT_Kd 440
+#endif
+
 
 #endif // PIDTEMP
 
@@ -237,7 +260,11 @@ Here are some standard links for getting your machine calibrated:
 // If your configuration is significantly different than this and you don't understand the issues involved, you probably
 // shouldn't use bed PID until someone else verifies your hardware works.
 // If this is enabled, find your own PID constants below.
+#ifdef ONE_UP
+#define PIDTEMPBED
+#else
 //#define PIDTEMPBED
+#endif
 
 //#define BED_LIMIT_SWITCHING
 
@@ -253,6 +280,12 @@ Here are some standard links for getting your machine calibrated:
 
   #define PID_BED_INTEGRAL_DRIVE_MAX MAX_BED_POWER //limit for the integral term
 
+#ifdef ONE_UP
+  //12V Silicone heater into 12mm basalt One-Up
+  #define  DEFAULT_bedKp 265.45
+  #define  DEFAULT_bedKi 36.41
+  #define  DEFAULT_bedKd 483.81
+#else
   //120v 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   //from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
   #define  DEFAULT_bedKp 10.00
@@ -264,6 +297,7 @@ Here are some standard links for getting your machine calibrated:
   //#define  DEFAULT_bedKp 97.1
   //#define  DEFAULT_bedKi 1.41
   //#define  DEFAULT_bedKd 1675.16
+#endif
 
   // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #endif // PIDTEMPBED
@@ -338,8 +372,16 @@ const bool X_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 const bool Y_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
 const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
 const bool Z_MIN_PROBE_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
+// TODO Start with end stops disabled, then add just a Z End Stop.
+#ifdef ONE_UP
+#define DISABLE_MAX_ENDSTOPS
+//#define DISABLE_MIN_ENDSTOPS
+#define DISABLE_XMAX_ENDSTOP
+#define DISABLE_YMAX_ENDSTOP
+#else
 //#define DISABLE_MAX_ENDSTOPS
 //#define DISABLE_MIN_ENDSTOPS
+#endif
 
 // If you want to enable the Z probe pin, but disable its use, uncomment the line below.
 // This only affects a Z probe endstop if you have separate Z min endstop as well and have
@@ -367,6 +409,20 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = false; // set to true to invert the l
 
 // @section machine
 
+#ifdef ONE_UP
+// Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
+#define INVERT_X_DIR false
+#define INVERT_Y_DIR false
+#define INVERT_Z_DIR false
+
+// @section extruder
+
+// For direct drive extruder v9 set to true, for geared extruder set to false.
+#define INVERT_E0_DIR true
+#define INVERT_E1_DIR false
+#define INVERT_E2_DIR false
+#define INVERT_E3_DIR false
+#else
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
 #define INVERT_X_DIR false
 #define INVERT_Y_DIR true
@@ -379,6 +435,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = false; // set to true to invert the l
 #define INVERT_E1_DIR false
 #define INVERT_E2_DIR false
 #define INVERT_E3_DIR false
+#endif
 
 // @section homing
 
@@ -587,6 +644,20 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = false; // set to true to invert the l
 
 // default settings
 
+#ifdef ONE_UP
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {88.88888888889,88.88888888889,1511.811023622047,88.57326053533955} // Steps per MM For One and Two Up
+#define DEFAULT_MAX_FEEDRATE          {500, 500, 5, 45}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {500,500,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
+
+#define DEFAULT_ACCELERATION          500    // X, Y, Z and E acceleration in mm/s^2 for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  500    // E acceleration in mm/s^2 for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   500    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
+
+// The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
+#define DEFAULT_XYJERK                10.0    // (mm/sec)
+#define DEFAULT_ZJERK                 0.4     // (mm/sec)
+#define DEFAULT_EJERK                 5.0    // (mm/sec)
+#else
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {80,80,4000,500}  // default steps per unit for Ultimaker
 #define DEFAULT_MAX_FEEDRATE          {300, 300, 5, 25}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {3000,3000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
@@ -599,6 +670,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = false; // set to true to invert the l
 #define DEFAULT_XYJERK                20.0    // (mm/sec)
 #define DEFAULT_ZJERK                 0.4     // (mm/sec)
 #define DEFAULT_EJERK                 5.0    // (mm/sec)
+#endif
 
 
 //=============================================================================
